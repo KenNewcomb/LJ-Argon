@@ -1,6 +1,8 @@
 import sys
-
+from modules import atomicProperties as ap
 ## Basic program structure (to be implemented):
+
+print(ap.mass)
 
 # Create 864 atom objects
 
