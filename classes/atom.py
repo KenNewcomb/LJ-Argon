@@ -12,12 +12,8 @@ class Atom:
 	vz = 0
 
 	def __init__(self):
-		"""Constructs an atom"""	
-		# self.x = some_randomness
-		# self.y = some_randomness
-		# self.z = some_randomness
-		# self.vx = 
-		# self.vy =
-		# self.vz = 
+		"""Constructs an atom"""
 	
+	def randcoord(self):
+		pass
 	# def the_boltzmannator(self):
