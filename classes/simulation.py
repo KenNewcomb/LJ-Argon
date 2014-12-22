@@ -56,3 +56,7 @@ class Simulation:
 			atom.vy = normDist[rand_index]
 			atom.vz = normDist[rand_index]
 			rand_index = rand_index + 3
+   
+       def updateForces(self)
+           for atom in self.atoms:
+               pass

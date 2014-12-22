@@ -10,10 +10,3 @@ class Atom:
 	vx = 0
 	vy = 0
 	vz = 0
-
-	def __init__(self):
-		"""Constructs an atom"""
-	
-	def randcoord(self):
-		pass
-	# def the_boltzmannator(self):

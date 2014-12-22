@@ -5,6 +5,8 @@ import math
 ## Local imports
 from classes.simulation import Simulation
 
+### INITIALIZATION ###
+
 # Instanstiate a new Simulation Object, with 864 particles.
 sim = Simulation(864)
 
@@ -14,10 +16,12 @@ sim.randomizePositions()
 # Apply random velocities to particles.
 sim.applyBoltzmannDist()
 
-# Allow them to move according to some time step
+### MAIN PROGRAM LOOP ###
 
-# Integrate, find new positions and momenta
+# Calculate forces on all atoms
+sim.updateForces()
 
-# Repeat until finished.
+# Move the atoms through a time step.
+sim.timeStep()
 
 # Analyze results (create velocity autocorrelation function and from this, compute material properties)
