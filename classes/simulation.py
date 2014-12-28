@@ -31,16 +31,15 @@ class Simulation:
 
     def randomizePositions(self):
         """Gives each atom random positions within the box"""      
-        for i in range(0, self.numAtoms):
-            self.atoms[i].x = random.random()*34.78
-            self.atoms[i].y = random.random()*34.78
-            self.atoms[i].z = random.random()*34.78
+        for atom in self.atoms:
+            atom.x = random.random()*34.78
+            atom.y = random.random()*34.78
+            atom.z = random.random()*34.78
         
     def applyBoltzmannDist(self):
         """Applies Boltzmann distribution to atomic velocities"""
         normDist = []
         scaling_factor = math.sqrt(self.kb*self.T/self.m)
-        print("scaling factor " + str(scaling_factor))
 
         # Establish Normal Distribution
         for i in range(0,3*self.numAtoms):
@@ -58,16 +57,13 @@ class Simulation:
             atom.vz = normDist[rand_index+2]
             rand_index = rand_index + 3
             
-        print(self.atoms[0].vx)
-        print(self.atoms[1].vx)
-            
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         dx = atom1.x - atom2.x
         dy = atom1.y - atom2.y
         dz = atom1.z - atom2.z
         r2 = dx*dx + dy*dy + dz*dz
-        #print("r2: " + str(r2))
+        print("r2: " + str(r2))
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
