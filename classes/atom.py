@@ -3,10 +3,19 @@
 # components of velocity (vx, vy, and vz).
 
 class Atom:
-	# 6 variables: 3 cartestian coordinates, 3 components of velocity.
-	x = 0
-	y = 0
-	z = 0
-	vx = 0
-	vy = 0
-	vz = 0
+    
+    def __init__(self):
+        # Spatial (cartesian) coordinates
+        self.x = 0
+        self.y = 0
+        self.z = 0
+    
+        # Velocity components
+        self.vx = 0
+        self.vy = 0
+        self.vz = 0
+    
+        # Force components
+        self.fx = 0
+        self.fy = 0
+        self.fz = 0

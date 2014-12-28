@@ -22,6 +22,6 @@ sim.applyBoltzmannDist()
 sim.updateForces()
 
 # Move the atoms through a time step.
-sim.timeStep()
+#sim.timeStep()
 
 # Analyze results (create velocity autocorrelation function and from this, compute material properties)
