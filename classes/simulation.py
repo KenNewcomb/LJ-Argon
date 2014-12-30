@@ -23,8 +23,6 @@ class Simulation:
     # List of atoms
     numAtoms = 0
     atoms = []
-    
-    tempcount = 0
 
     def __init__(self, numAtoms):
         """Creates a simulation with numAtoms"""
@@ -77,13 +75,12 @@ class Simulation:
             forcey = force*dy
             forcez = force*dz
             
-            self.atoms[atom1].fx + forcex
-            self.atoms[atom2].fx - forcex
-            self.atoms[atom1].fy + forcey
-            self.atoms[atom2].fy - forcey
-            self.atoms[atom1].fz + forcez
-            self.atoms[atom2].fz - forcez
-            
+            self.atoms[atom1].fx += forcex
+            self.atoms[atom2].fx -= forcex
+            self.atoms[atom1].fy += forcey
+            self.atoms[atom2].fy -= forcey
+            self.atoms[atom1].fz += forcez
+            self.atoms[atom2].fz -= forcez
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
