@@ -15,13 +15,16 @@ class Simulation:
     # Simulation/atomic parameters
     m = (39.95*1.6747e-24) # mass of a single atom , Kg
     e = kb*120 # depth of potential well, J
-    d = 3.4 # sigma in Lennard-Jones Potential ,angstroms
-    rcut = 2.25*d # Cutoff radius , angstroms
+    d = 3.4 # sigma in Lennard-Jones Potential, angstroms
+    rcut = 2.25*d # Cutoff radius, angstroms
+    rcutsq = rcut**2 # Square of the cutoff radius.
     T = 120 # Temperature, K
 
     # List of atoms
     numAtoms = 0
     atoms = []
+    
+    tempcount = 0
 
     def __init__(self, numAtoms):
         """Creates a simulation with numAtoms"""
@@ -59,14 +62,31 @@ class Simulation:
             
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
-        dx = atom1.x - atom2.x
-        dy = atom1.y - atom2.y
-        dz = atom1.z - atom2.z
+        # Calculate distance between two atoms
+        dx = self.atoms[atom1].x - self.atoms[atom2].x
+        dy = self.atoms[atom1].y - self.atoms[atom2].y
+        dz = self.atoms[atom1].z - self.atoms[atom2].z
         r2 = dx*dx + dy*dy + dz*dz
-        print("r2: " + str(r2))
+        
+        #  If atoms are within cutoff radius
+        if r2 < self.rcutsq:
+            recipr = 1/r2
+            recipr6 = r2**3
+            force = 48*self.e*recipr*recipr6*(recipr-0.5)
+            forcex = force*dx
+            forcey = force*dy
+            forcez = force*dz
+            
+            self.atoms[atom1].fx + forcex
+            self.atoms[atom2].fx - forcex
+            self.atoms[atom1].fy + forcey
+            self.atoms[atom2].fy - forcey
+            self.atoms[atom1].fz + forcez
+            self.atoms[atom2].fz - forcez
+            
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
         for atom1 in range(0, len(self.atoms)-1):
             for atom2 in range(atom1+1, len(self.atoms)):
-                self.ljforce(self.atoms[atom1], self.atoms[atom2])
+                self.ljforce(atom1, atom2)
