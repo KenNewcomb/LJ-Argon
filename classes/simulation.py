@@ -9,33 +9,30 @@ from atom import Atom
 
 class Simulation:
 
-    # Constants involved in a simulation
+    # Simulation parameters/constants 
     kb = 1.380e-23 # Boltzmann
-
-    # Simulation/atomic parameters
     m = (39.95*1.6747e-24) # mass of a single atom , Kg
     e = kb*120 # depth of potential well, J
     d = 3.4 # sigma in Lennard-Jones Potential, angstroms
     rcut = 2.25*d # Cutoff radius, angstroms
     rcutsq = rcut**2 # Square of the cutoff radius.
     T = 120 # Temperature, K
-
-    # List of atoms
-    numAtoms = 0
+    numAtoms = 864
+    lbox = 10.229*d
+    
     atoms = []
 
-    def __init__(self, numAtoms):
+    def __init__(self):
         """Creates a simulation with numAtoms"""
-        self.numAtoms = numAtoms
-        for i in range(0,numAtoms):
+        for i in range(0,self.numAtoms):
             self.atoms.append(Atom())
 
     def randomizePositions(self):
         """Gives each atom random positions within the box"""      
         for atom in self.atoms:
-            atom.x = random.random()*34.78
-            atom.y = random.random()*34.78
-            atom.z = random.random()*34.78
+            atom.x = random.random()*self.lbox
+            atom.y = random.random()*self.lbox
+            atom.z = random.random()*self.lbox
         
     def applyBoltzmannDist(self):
         """Applies Boltzmann distribution to atomic velocities"""
@@ -66,7 +63,12 @@ class Simulation:
         dz = self.atoms[atom1].z - self.atoms[atom2].z
         r2 = dx*dx + dy*dy + dz*dz
         
-        #  If atoms are within cutoff radius
+        # Periodic boundary conditions (minimum image convention)     
+        dx = dx - self.lbox*round(dx/self.lbox)
+        dy = dy - self.lbox*round(dy/self.lbox)
+        dz = dz - self.lbox*round(dz/self.lbox)
+        
+        # If atoms are within cutoff radius
         if r2 < self.rcutsq:
             recipr = 1/r2
             recipr6 = r2**3
@@ -87,3 +89,6 @@ class Simulation:
         for atom1 in range(0, len(self.atoms)-1):
             for atom2 in range(atom1+1, len(self.atoms)):
                 self.ljforce(atom1, atom2)
+
+    #def timeStep(self):
+        

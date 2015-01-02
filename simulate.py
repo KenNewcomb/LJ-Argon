@@ -7,8 +7,8 @@ from classes.simulation import Simulation
 
 ### INITIALIZATION ###
 
-# Instanstiate a new Simulation Object, with 864 particles.
-sim = Simulation(864)
+# Instanstiate a new simulation object.
+sim = Simulation()
 
 # Give each atom a random position in 3D-space
 sim.randomizePositions()
@@ -20,7 +20,6 @@ sim.applyBoltzmannDist()
 
 # Calculate forces on all atoms
 sim.updateForces()
-
 # Move the atoms through a time step.
 #sim.timeStep()
 
