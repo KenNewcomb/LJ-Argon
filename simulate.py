@@ -18,9 +18,10 @@ sim.applyBoltzmannDist()
 
 ### MAIN PROGRAM LOOP ###
 
-# Calculate forces on all atoms
-sim.updateForces()
-# Move the atoms through a time step.
-#sim.timeStep()
+for steps in range(0,100):
+    # Calculate forces on all atoms
+    sim.updateForces()
+    # Move the atoms through a time step.
+    sim.timeStep()
 
 # Analyze results (create velocity autocorrelation function and from this, compute material properties)

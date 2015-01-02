@@ -17,8 +17,9 @@ class Simulation:
     rcut = 2.25*d # Cutoff radius, angstroms
     rcutsq = rcut**2 # Square of the cutoff radius.
     T = 120 # Temperature, K
-    numAtoms = 864
-    lbox = 10.229*d
+    numAtoms = 864 # Number of atoms to simulate
+    lbox = 10.229*d # length of the box.
+    dt = 10e-14 # Time step, seconds
     
     atoms = []
 
@@ -63,7 +64,7 @@ class Simulation:
         dz = self.atoms[atom1].z - self.atoms[atom2].z
         r2 = dx*dx + dy*dy + dz*dz
         
-        # Periodic boundary conditions (minimum image convention)     
+        # Minimum image convention 
         dx = dx - self.lbox*round(dx/self.lbox)
         dy = dy - self.lbox*round(dy/self.lbox)
         dz = dz - self.lbox*round(dz/self.lbox)
@@ -90,5 +91,45 @@ class Simulation:
             for atom2 in range(atom1+1, len(self.atoms)):
                 self.ljforce(atom1, atom2)
 
-    #def timeStep(self):
-        
+    def timeStep(self):
+        """Moves the system through a given time step, according to the energies"""
+        for atom in self.atoms:
+            # Calculate new positions
+            newX = 2*atom.x - atom.xprev + self.dt**2*atom.fx
+            newY = 2*atom.y - atom.yprev + self.dt**2*atom.fy
+            newZ = 2*atom.z - atom.zprev + self.dt**2*atom.fz
+
+            # Update current velocities
+            atom.vx = (newX - atom.x)/(2*self.dt)
+            atom.vy = (newY - atom.y)/(2*self.dt)
+            atom.vz = (newZ - atom.z)/(2*self.dt)
+            
+            # Update previous positions
+            atom.xprev = atom.x
+            atom.yprev = atom.y
+            atom.zprev = atom.z
+            
+            # Update current positions (applying PBC)
+            if newX < 0:
+                atom.x = newX + self.lbox
+            elif newX > self.lbox:
+                atom.x = newX - self.lbox
+            else:
+                atom.x = newX
+            
+            if newY < 0:
+                atom.y = newY + self.lbox
+            elif newY > self.lbox:
+                atom.y = newY - self.lbox
+            else:
+                atom.y = newY
+                
+            if atom.z < 0:
+                atom.z = newZ + self.lbox
+            elif newZ > self.lbox:
+                atom.z = newZ - self.lbox
+            else:
+                atom.z = newZ
+                
+        print("Atom 1 x position: " + str(self.atoms[0].x))
+        print("Atom 1 x force: " + str(self.atoms[0].fx))

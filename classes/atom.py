@@ -9,13 +9,19 @@ class Atom:
         self.x = 0
         self.y = 0
         self.z = 0
+        
+        # Position at t-step
+        self.xprev = 0
+        self.yprev = 0
+        self.zprev = 0
     
         # Velocity components
         self.vx = 0
         self.vy = 0
         self.vz = 0
-    
+        
         # Force components
         self.fx = 0
         self.fy = 0
         self.fz = 0
+        
