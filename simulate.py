@@ -10,8 +10,8 @@ from classes.simulation import Simulation
 # Instanstiate a new simulation object.
 sim = Simulation()
 
-# Give each atom a random position in 3D-space
-sim.randomizePositions()
+# Initially place each atom on a simple cubic lattice
+sim.assignPositions()
 	
 # Apply random velocities to particles.
 sim.applyBoltzmannDist()
@@ -23,5 +23,6 @@ for steps in range(0,100):
     sim.updateForces()
     # Move the atoms through a time step.
     sim.timeStep()
+    sim.getTemperature()
 
 # Analyze results (create velocity autocorrelation function and from this, compute material properties)
