@@ -3,6 +3,7 @@
 ## System imports
 import random
 import math
+import time
 
 ## Local imports
 from atom import Atom
@@ -10,21 +11,19 @@ from atom import Atom
 class Simulation:
 
     # Simulation parameters/constants 
-    kb = 1.380e-23 # Boltzmann (SI UNITS)
+    kb = 1.380e-23 # Boltzmann (J/K)
     Nav = 6.022e23 # Molecules/mol
-    m = (39.95/Nav)*10**-3 # mass of a single atom , Kg
+    m = (39.95/Nav)*(10**-3) # mass of a single atom , Kg
     e = kb*120 # depth of potential well, J
-    d = 3.4e-10 # sigma in Lennard-Jones Potential, meters
-    rcut = 2.25*d # Cutoff radius, meters
+    sigma = 3.4e-10 # sigma in Lennard-Jones Potential, meters
+    rcut = 2.25*sigma # Cutoff radius, meters
     rcutsq = rcut**2 # Square of the cutoff radius.
     T = 90 # Temperature, K
     numAtoms = 864 # Number of atoms to simulate
-    lbox = 10.229*d # length of the box. (meters)
+    lbox = 10.229*sigma # length of the box. (meters)
     dt = 10e-14 # Time step, seconds
-    mtot = m*numAtoms # Total mass, kg
-    nSteps = 10 # Number of time steps
-    
-    
+    nSteps = 50 # Number of time steps
+
     atoms = []
 
     def __init__(self):
@@ -33,11 +32,21 @@ class Simulation:
             self.atoms.append(Atom())
 
     def assignPositions(self):
-        """Places each atom on a simple cubic lattice"""      
-        for atom in self.atoms:
-            atom.x = random.random()*self.lbox
-            atom.y = random.random()*self.lbox
-            atom.z = random.random()*self.lbox
+        """Places each atom in arbitrary positions in the box."""
+        n = 10 # Number of atoms in a direction
+        particle = 0 # Particles placed so far
+        
+        for x in range(0, n):
+            for y in range(0, n):
+                for z in range(0, n):
+                    if (particle < self.numAtoms):
+                        self.atoms[particle].x = (x + 0.5) * self.sigma
+                        self.atoms[particle].y = (y + 0.5) * self.sigma                 
+                        self.atoms[particle].z = (z + 0.5) * self.sigma
+                    particle += 1
+                    z += 1
+                y += 1
+            x += 1
         
     def applyBoltzmannDist(self):
         """Applies Boltzmann distribution to atomic velocities"""
@@ -45,7 +54,7 @@ class Simulation:
         scaling_factor = math.sqrt(self.kb*self.T/self.m)
 
         # Establish Normal Distribution
-        for i in range(0,3*self.numAtoms):
+        for i in range(0, 3*self.numAtoms):
             normDist.append(random.gauss(0,1))
         
         # Apply scaling factor to distribution
@@ -58,32 +67,41 @@ class Simulation:
             self.atoms[atom].vx = normDist[rand_index]
             self.atoms[atom].vy = normDist[rand_index+1]
             self.atoms[atom].vz = normDist[rand_index+2]
-            rand_index = rand_index + 3
+            rand_index += 3
+
+        for atom in range(0, len(self.atoms)-1):
+            self.atoms[atom].xprev = self.atoms[atom].x - self.atoms[atom].vx*self.dt
+            self.atoms[atom].yprev = self.atoms[atom].y - self.atoms[atom].vy*self.dt
+            self.atoms[atom].zprev = self.atoms[atom].z - self.atoms[atom].vz*self.dt
     
+
     def mainLoop(self):
         for step in range(0, self.nSteps):
             self.updateForces()
             self.timeStep()
             self.getTemperature()
-            
+            self.resetForces()
+
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         # Calculate distance between two atoms
         dx = self.atoms[atom1].x - self.atoms[atom2].x
         dy = self.atoms[atom1].y - self.atoms[atom2].y
         dz = self.atoms[atom1].z - self.atoms[atom2].z
+        
+        dx -= self.lbox*round(dx/self.lbox)
+        dy -= self.lbox*round(dy/self.lbox)
+        dz -= self.lbox*round(dz/self.lbox)
+        
         r2 = dx*dx + dy*dy + dz*dz
         
-        # Minimum image convention 
-        dx = dx - self.lbox*round(dx/self.lbox)
-        dy = dy - self.lbox*round(dy/self.lbox)
-        dz = dz - self.lbox*round(dz/self.lbox)
-        
-        # If atoms are within cutoff radius
+        # Minimum image convention
+
         if r2 < self.rcutsq:
-            recipr = 1/r2
-            recipr6 = r2**3
-            force = 48*self.e*recipr*recipr6*(recipr-0.5)
+            fr2 = (self.sigma**2)/r2
+            fr6 = fr2**3
+            force = 48*self.e*fr6*(fr6 - 0.5)/r2
+
             forcex = force*dx
             forcey = force*dy
             forcez = force*dz
@@ -103,50 +121,64 @@ class Simulation:
 
     def timeStep(self):
         """Moves the system through a given time step, according to the energies"""
-        for atom in self.atoms:
+        for atom in range(0, len(self.atoms)-1):
             # Calculate new positions
-            newX = 2*atom.x - atom.xprev + self.dt**2*atom.fx
-            newY = 2*atom.y - atom.yprev + self.dt**2*atom.fy
-            newZ = 2*atom.z - atom.zprev + self.dt**2*atom.fz
+
+            newX = 2*self.atoms[atom].x - self.atoms[atom].xprev + (self.dt**2)*(self.atoms[atom].fx/self.m)
+            newY = 2*self.atoms[atom].y - self.atoms[atom].yprev + (self.dt**2)*(self.atoms[atom].fy/self.m)
+            newZ = 2*self.atoms[atom].z - self.atoms[atom].zprev + (self.dt**2)*(self.atoms[atom].fz/self.m)
 
             # Update current velocities
-            atom.vx = (newX - atom.x)/(2*self.dt)
-            atom.vy = (newY - atom.y)/(2*self.dt)
-            atom.vz = (newZ - atom.z)/(2*self.dt)
+            self.atoms[atom].vx = (newX - self.atoms[atom].x)/(self.dt)
+            self.atoms[atom].vy = (newY - self.atoms[atom].y)/(self.dt)
+            self.atoms[atom].vz = (newZ - self.atoms[atom].z)/(self.dt)
             
             # Update previous positions
-            atom.xprev = atom.x
-            atom.yprev = atom.y
-            atom.zprev = atom.z
+            self.atoms[atom].xprev = self.atoms[atom].x
+            self.atoms[atom].yprev = self.atoms[atom].y
+            self.atoms[atom].zprev = self.atoms[atom].z
             
             # Update current positions (applying PBC)
             if newX < 0:
-                atom.x = newX + self.lbox
+                self.atoms[atom].x = newX + self.lbox
+                self.atoms[atom].xprev += self.lbox
             elif newX > self.lbox:
-                atom.x = newX - self.lbox
+                self.atoms[atom].x = newX - self.lbox
+                self.atoms[atom].xprev -= self.lbox
             else:
-                atom.x = newX
+                self.atoms[atom].x = newX
             
             if newY < 0:
-                atom.y = newY + self.lbox
+                self.atoms[atom].y = newY + self.lbox
+                self.atoms[atom].yprev += self.lbox
             elif newY > self.lbox:
-                atom.y = newY - self.lbox
+                self.atoms[atom].y = newY - self.lbox
+                self.atoms[atom].yprev -= self.lbox
             else:
-                atom.y = newY
+                self.atoms[atom].y = newY
                 
             if newZ < 0:
-                atom.z = newZ + self.lbox
+                self.atoms[atom].z = newZ + self.lbox
+                self.atoms[atom].zprev += self.lbox
             elif newZ > self.lbox:
-                atom.z = newZ - self.lbox
+                self.atoms[atom].z = newZ - self.lbox
+                self.atoms[atom].zprev -= self.lbox
             else:
-                atom.z = newZ
-    
+                self.atoms[atom].z = newZ
+         
+
+    def resetForces(self):
+        """Sets all forces to zero"""
+        for atom in range(0, len(self.atoms) -1):
+            self.atoms[atom].fx = 0
+            self.atoms[atom].fy = 0
+            self.atoms[atom].fz = 0
+            
     def getTemperature(self):
         """Calculates the current system temperature"""
         sumv2 = 0
         for atom in self.atoms:
-            print(atom.vx)
             sumv2 += atom.vx**2 + atom.vy**2 + atom.vz**2
-        #print(sumv2)
-        temp = (self.mtot/(3*self.Nav*self.kb))*sumv2
-        #print(temp)
+        temp = (self.m/(3*self.numAtoms*self.kb))*sumv2
+        print("SUMV2 " + str(sumv2))
+        print("TEMP: " + str(temp))

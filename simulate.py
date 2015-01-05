@@ -17,4 +17,4 @@ sim.assignPositions()
 sim.applyBoltzmannDist()
 
 ### MAIN PROGRAM LOOP ###
-sim.mainLoop()    
+sim.mainLoop()
