@@ -21,7 +21,9 @@ class Simulation:
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*d # length of the box. (meters)
     dt = 10e-14 # Time step, seconds
-    mtot = m*numAtoms # Total mass, kg  
+    mtot = m*numAtoms # Total mass, kg
+    nSteps = 10 # Number of time steps
+    
     
     atoms = []
 
@@ -57,6 +59,12 @@ class Simulation:
             self.atoms[atom].vy = normDist[rand_index+1]
             self.atoms[atom].vz = normDist[rand_index+2]
             rand_index = rand_index + 3
+    
+    def mainLoop(self):
+        for step in range(0, self.nSteps):
+            sim.updateForces()
+            sim.timeStep()
+            sim.getTemperature()
             
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
