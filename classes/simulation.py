@@ -62,9 +62,9 @@ class Simulation:
     
     def mainLoop(self):
         for step in range(0, self.nSteps):
-            sim.updateForces()
-            sim.timeStep()
-            sim.getTemperature()
+            self.updateForces()
+            self.timeStep()
+            self.getTemperature()
             
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
@@ -134,7 +134,7 @@ class Simulation:
             else:
                 atom.y = newY
                 
-            if atom.z < 0:
+            if newZ < 0:
                 atom.z = newZ + self.lbox
             elif newZ > self.lbox:
                 atom.z = newZ - self.lbox
