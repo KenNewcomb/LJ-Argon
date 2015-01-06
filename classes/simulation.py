@@ -22,7 +22,7 @@ class Simulation:
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*sigma # length of the box. (meters)
     dt = 1e-14 # Time step, seconds
-    nSteps = 5 # Number of time steps
+    nSteps = 40 # Number of time steps
     realTemp = 0 # System temperature
 
     atoms = []
@@ -57,17 +57,14 @@ class Simulation:
             normDist.append(random.gauss(0,1))
         
         # Apply scaling factor to distribution
-        for number in range(0, len(normDist)-1):
+        for number in range(0, 3*self.numAtoms):
             normDist[number] = normDist[number]*scaling_factor
             
         # Distribute velocities
-        rand_index = 0
-        for atom in range(0, len(self.atoms)-1):
-            self.atoms[atom].vx = normDist[rand_index]
-            self.atoms[atom].vy = normDist[rand_index+1]
-            self.atoms[atom].vz = normDist[rand_index+2]
-            rand_index += 3
-
+        for atom in range(0, self.numAtoms):
+            self.atoms[atom].vx = normDist[atom*3]
+            self.atoms[atom].vy = normDist[atom*3+1]
+            self.atoms[atom].vz = normDist[atom*3+2]
     def mainLoop(self):
         for step in range(0, self.nSteps):
             start = time.time()
@@ -104,7 +101,6 @@ class Simulation:
             fr6 = fr2**3
             force = 48*self.e*fr6*(fr6 - 0.5)/r2
             
-            
             forcex = force*dx
             forcey = force*dy
             forcez = force*dz
@@ -119,13 +115,13 @@ class Simulation:
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
-        for atom1 in range(0, len(self.atoms)-1):
-            for atom2 in range(atom1+1, len(self.atoms)):
+        for atom1 in range(0, self.numAtoms-1):
+            for atom2 in range(atom1+1, self.numAtoms):
                 self.ljforce(atom1, atom2)
 
     def timeStep(self):
         """Moves the system through a given time step, according to the energies"""
-        for atom in range(0, len(self.atoms)-1):
+        for atom in range(0, self.numAtoms):
             
             # Update velocities
             self.atoms[atom].vx += (self.atoms[atom].fx/self.m)*self.dt
@@ -161,7 +157,7 @@ class Simulation:
 
     def resetForces(self):
         """Sets all forces to zero"""
-        for atom in range(0, len(self.atoms) -1):
+        for atom in range(0, self.numAtoms):
             self.atoms[atom].fx = 0
             self.atoms[atom].fy = 0
             self.atoms[atom].fz = 0
@@ -179,7 +175,7 @@ class Simulation:
         """Scales the temperature according to desired temperature"""
         if self.realTemp > 100.0 or self.realTemp < 80.0:
             print("Rescaling velocities...")
-            for atom in range(0, len(self.atoms)-1):
+            for atom in range(0, self.numAtoms):
                 self.atoms[atom].vx *= math.sqrt(self.T/self.realTemp)
                 self.atoms[atom].vy *= math.sqrt(self.T/self.realTemp)
                 self.atoms[atom].vz *= math.sqrt(self.T/self.realTemp)
