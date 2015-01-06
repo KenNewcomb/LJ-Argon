@@ -10,11 +10,6 @@ class Atom:
         self.y = 0
         self.z = 0
         
-        # Position at t-step
-        self.xprev = 0
-        self.yprev = 0
-        self.zprev = 0
-    
         # Velocity components
         self.vx = 0
         self.vy = 0
