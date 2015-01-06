@@ -22,7 +22,7 @@ class Simulation:
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*sigma # length of the box. (meters)
     dt = 1e-14 # Time step, seconds
-    nSteps = 200 # Number of time steps
+    nSteps = 5 # Number of time steps
     realTemp = 0 # System temperature
 
     atoms = []
@@ -42,13 +42,10 @@ class Simulation:
             for y in range(0, n):
                 for z in range(0, n):
                     if (particle < self.numAtoms):
-                        self.atoms[particle].x = (x + 0.5) * self.sigma
-                        self.atoms[particle].y = (y + 0.5) * self.sigma                 
-                        self.atoms[particle].z = (z + 0.5) * self.sigma
-                    particle += 1
-                    z += 1
-                y += 1
-            x += 1
+                        self.atoms[particle].x = x * self.sigma
+                        self.atoms[particle].y = y * self.sigma                 
+                        self.atoms[particle].z = z * self.sigma
+                        particle += 1
 
     def applyBoltzmannDist(self):
         """Applies Boltzmann distribution to atomic velocities"""
