@@ -1,12 +1,16 @@
 ## System imports
 import sys
 import math
+import os
 
 ## Local imports
 from classes.simulation import Simulation
 
 ### INITIALIZATION ###
-
+try:
+    os.remove("output.csv")
+except OSError:
+    pass
 # Instanstiate a new simulation object.
 sim = Simulation()
 

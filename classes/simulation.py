@@ -81,7 +81,8 @@ class Simulation:
             self.timeStep()
             self.getTemperature()
             self.resetForces()
-            self.scaleTemperature()
+            if step > 100:
+                self.scaleTemperature()
             self.writeToFile()
             print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
 
