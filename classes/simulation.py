@@ -22,11 +22,11 @@ class Simulation:
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*sigma # length of the box. (meters)
     dt = 1e-14 # Time step, seconds
-    nSteps = 300 # Number of time steps
+    nSteps = 200 # Number of time steps
     realTemp = 0 # System temperature
 
     atoms = []
-    temperatures = []
+    temperatures = [0.0]*nSteps
     
     def __init__(self):
         """Creates a simulation with numAtoms"""
@@ -81,15 +81,18 @@ class Simulation:
             start = time.time()
             self.updateForces()
             self.timeStep()
-            self.getTemperature()
+            self.getTemperature(step)
             self.resetForces()
             if step > 100:
                 self.scaleTemperature()
             stop = time.time()
             print("Time: " + str(stop-start))
             print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
+        start = time.time()
+        print("writing to file")
         self.writeToFile()
-            
+        stop = time.time()  
+        print("time: " + str(stop-start))
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         # Calculate distance between two atoms
@@ -177,13 +180,13 @@ class Simulation:
             self.atoms[atom].fy = 0
             self.atoms[atom].fz = 0
             
-    def getTemperature(self):
+    def getTemperature(self, step):
         """Calculates the current system temperature"""
         sumv2 = 0
         for atom in self.atoms:
             sumv2 += atom.vx**2 + atom.vy**2 + atom.vz**2
         self.realTemp = (self.m/(3*self.numAtoms*self.kb))*sumv2
-        self.temperatures.append(self.realTemp)
+        self.temperatures[step] = (self.realTemp)
         print("TEMP: " + str(self.realTemp))
         
     def scaleTemperature(self):
