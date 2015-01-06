@@ -1,6 +1,4 @@
-# An object that represents a single "atom" to be studied.
-# Each atom has Cartesian coordinates x, y, and z, as well as their respective
-# components of velocity (vx, vy, and vz).
+"""atom.py: An object that represents a single "atom" to be studied."""
 
 class Atom:
     

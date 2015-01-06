@@ -66,6 +66,18 @@ class Simulation:
             self.atoms[atom].vy = normDist[atom*3+1]
             self.atoms[atom].vz = normDist[atom*3+2]
 
+    def updateForces(self):
+        """Calculates the net potential on each atom, applying a cutoff radius"""
+        for atom1 in range(0, self.numAtoms-1):
+            for atom2 in range(atom1+1, self.numAtoms):
+                self.ljforce(atom1, atom2)
+                
+            # Multiply by constants        
+        for atom in range(0, self.numAtoms):
+            self.atoms[atom].fx *= 48*self.e
+            self.atoms[atom].fy *= 48*self.e
+            self.atoms[atom].fz *= 48*self.e
+            
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         # Calculate distance between two atoms
@@ -95,22 +107,8 @@ class Simulation:
             self.atoms[atom2].fy -= forcey
             self.atoms[atom1].fz += forcez
             self.atoms[atom2].fz -= forcez
-
-        
-    def updateForces(self):
-        """Calculates the net potential on each atom, applying a cutoff radius"""
-        for atom1 in range(0, self.numAtoms-1):
-            for atom2 in range(atom1+1, self.numAtoms):
-                self.ljforce(atom1, atom2)
-            # Multiply by constants
-        
-        for atom in range(0, self.numAtoms):
-            self.atoms[atom].fx *= 48*self.e
-            self.atoms[atom].fy *= 48*self.e
-            self.atoms[atom].fz *= 48*self.e
             
-
-    def timeStep(self):
+    def verletIntegration(self):
         """Moves the system through a given time step, according to the energies"""
         for atom in range(0, self.numAtoms):
             
@@ -180,7 +178,7 @@ class Simulation:
         for step in range(0, self.nSteps):
             start = time.time()
             self.updateForces()
-            self.timeStep()
+            self.verletIntegration()
             self.getTemperature(step)
             self.resetForces()
             if step > 100:
