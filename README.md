@@ -6,4 +6,4 @@ A [molecular dynamics (MD)](https://en.wikipedia.org/wiki/Molecular_dynamics) si
 Usage
 ------
 
-	simulate.py
+	python simulate.py

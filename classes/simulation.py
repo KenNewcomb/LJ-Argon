@@ -65,22 +65,6 @@ class Simulation:
             self.atoms[atom].vx = normDist[atom*3]
             self.atoms[atom].vy = normDist[atom*3+1]
             self.atoms[atom].vz = normDist[atom*3+2]
-    def mainLoop(self):
-        for step in range(0, self.nSteps):
-            start = time.time()
-            self.updateForces()
-            self.timeStep()
-            self.getTemperature(step)
-            self.resetForces()
-            if step > 100:
-                self.scaleTemperature()
-            stop = time.time()
-            print("Time: " + str(stop-start))
-            print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
-        start = time.time()
-        print("writing to file")
-        self.writeToFile()
-        stop = time.time()  
 
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
@@ -99,7 +83,7 @@ class Simulation:
         if r2 < self.rcutsq:
             fr2 = (self.sigma**2)/r2
             fr6 = fr2**3
-            force = 48*self.e*fr6*(fr6 - 0.5)/r2
+            force = fr6*(fr6 - 0.5)/r2
             
             forcex = force*dx
             forcey = force*dy
@@ -118,6 +102,13 @@ class Simulation:
         for atom1 in range(0, self.numAtoms-1):
             for atom2 in range(atom1+1, self.numAtoms):
                 self.ljforce(atom1, atom2)
+            # Multiply by constants
+        
+        for atom in range(0, self.numAtoms):
+            self.atoms[atom].fx *= 48*self.e
+            self.atoms[atom].fy *= 48*self.e
+            self.atoms[atom].fz *= 48*self.e
+            
 
     def timeStep(self):
         """Moves the system through a given time step, according to the energies"""
@@ -184,3 +175,20 @@ class Simulation:
         with open("output.csv", "a") as output:
             for temperature in self.temperatures:
                 output.write("%s\n" % temperature)
+                
+    def mainLoop(self):
+        for step in range(0, self.nSteps):
+            start = time.time()
+            self.updateForces()
+            self.timeStep()
+            self.getTemperature(step)
+            self.resetForces()
+            if step > 100:
+                self.scaleTemperature()
+            stop = time.time()
+            print("Time: " + str(stop-start))
+            print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
+        start = time.time()
+        print("writing to file")
+        self.writeToFile()
+        stop = time.time()  
