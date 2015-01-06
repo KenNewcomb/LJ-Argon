@@ -35,7 +35,7 @@ class Simulation:
 
     def assignPositions(self):
         """Places each atom in arbitrary positions in the box."""
-        n = 10 # Number of atoms in a direction
+        n = int(math.ceil(self.numAtoms**(1.0/3.0))) # Number of atoms in a direction
         particle = 0 # Particles placed so far
         
         for x in range(0, n):
@@ -68,11 +68,6 @@ class Simulation:
             self.atoms[atom].vz = normDist[rand_index+2]
             rand_index += 3
 
-        for atom in range(0, len(self.atoms)-1):
-            self.atoms[atom].xprev = self.atoms[atom].x - self.atoms[atom].vx*self.dt
-            self.atoms[atom].yprev = self.atoms[atom].y - self.atoms[atom].vy*self.dt
-            self.atoms[atom].zprev = self.atoms[atom].z - self.atoms[atom].vz*self.dt
-
     def mainLoop(self):
         for step in range(0, self.nSteps):
             start = time.time()
@@ -89,7 +84,7 @@ class Simulation:
         print("writing to file")
         self.writeToFile()
         stop = time.time()  
-        print("time: " + str(stop-start))
+
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         # Calculate distance between two atoms
@@ -145,28 +140,22 @@ class Simulation:
             # Update current positions (applying PBC)
             if newX < 0:
                 self.atoms[atom].x = newX + self.lbox
-                self.atoms[atom].xprev += self.lbox
             elif newX > self.lbox:
                 self.atoms[atom].x = newX - self.lbox
-                self.atoms[atom].xprev -= self.lbox
             else:
                 self.atoms[atom].x = newX
             
             if newY < 0:
                 self.atoms[atom].y = newY + self.lbox
-                self.atoms[atom].yprev += self.lbox
             elif newY > self.lbox:
                 self.atoms[atom].y = newY - self.lbox
-                self.atoms[atom].yprev -= self.lbox
             else:
                 self.atoms[atom].y = newY
                 
             if newZ < 0:
                 self.atoms[atom].z = newZ + self.lbox
-                self.atoms[atom].zprev += self.lbox
             elif newZ > self.lbox:
                 self.atoms[atom].z = newZ - self.lbox
-                self.atoms[atom].zprev -= self.lbox 
             else:
                 self.atoms[atom].z = newZ
 
