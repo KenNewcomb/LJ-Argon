@@ -21,8 +21,9 @@ class Simulation:
     T = 90 # Temperature, K
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*sigma # length of the box. (meters)
-    dt = 10e-14 # Time step, seconds
-    nSteps = 50 # Number of time steps
+    dt = 1e-14 # Time step, seconds
+    nSteps = 500 # Number of time steps
+    realTemp = 0 # System temperature
 
     atoms = []
 
@@ -47,7 +48,7 @@ class Simulation:
                     z += 1
                 y += 1
             x += 1
-        
+
     def applyBoltzmannDist(self):
         """Applies Boltzmann distribution to atomic velocities"""
         normDist = []
@@ -73,7 +74,6 @@ class Simulation:
             self.atoms[atom].xprev = self.atoms[atom].x - self.atoms[atom].vx*self.dt
             self.atoms[atom].yprev = self.atoms[atom].y - self.atoms[atom].vy*self.dt
             self.atoms[atom].zprev = self.atoms[atom].z - self.atoms[atom].vz*self.dt
-    
 
     def mainLoop(self):
         for step in range(0, self.nSteps):
@@ -81,6 +81,9 @@ class Simulation:
             self.timeStep()
             self.getTemperature()
             self.resetForces()
+            self.scaleTemperature()
+            self.writeToFile()
+            print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
 
     def ljforce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
@@ -89,19 +92,19 @@ class Simulation:
         dy = self.atoms[atom1].y - self.atoms[atom2].y
         dz = self.atoms[atom1].z - self.atoms[atom2].z
         
+        # Minimum Image Convention
         dx -= self.lbox*round(dx/self.lbox)
         dy -= self.lbox*round(dy/self.lbox)
         dz -= self.lbox*round(dz/self.lbox)
         
         r2 = dx*dx + dy*dy + dz*dz
-        
-        # Minimum image convention
 
         if r2 < self.rcutsq:
             fr2 = (self.sigma**2)/r2
             fr6 = fr2**3
             force = 48*self.e*fr6*(fr6 - 0.5)/r2
-
+            
+            
             forcex = force*dx
             forcey = force*dy
             forcez = force*dz
@@ -112,6 +115,7 @@ class Simulation:
             self.atoms[atom2].fy -= forcey
             self.atoms[atom1].fz += forcez
             self.atoms[atom2].fz -= forcez
+
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
@@ -124,9 +128,9 @@ class Simulation:
         for atom in range(0, len(self.atoms)-1):
             # Calculate new positions
 
-            newX = 2*self.atoms[atom].x - self.atoms[atom].xprev + (self.dt**2)*(self.atoms[atom].fx/self.m)
-            newY = 2*self.atoms[atom].y - self.atoms[atom].yprev + (self.dt**2)*(self.atoms[atom].fy/self.m)
-            newZ = 2*self.atoms[atom].z - self.atoms[atom].zprev + (self.dt**2)*(self.atoms[atom].fz/self.m)
+            newX = self.atoms[atom].x + self.atoms[atom].vx*self.dt + (self.dt**2)*(self.atoms[atom].fx/self.m)
+            newY = self.atoms[atom].y + self.atoms[atom].vy*self.dt + (self.dt**2)*(self.atoms[atom].fy/self.m)
+            newZ = self.atoms[atom].z + self.atoms[atom].vz*self.dt + (self.dt**2)*(self.atoms[atom].fz/self.m)
 
             # Update current velocities
             self.atoms[atom].vx = (newX - self.atoms[atom].x)/(self.dt)
@@ -162,10 +166,9 @@ class Simulation:
                 self.atoms[atom].zprev += self.lbox
             elif newZ > self.lbox:
                 self.atoms[atom].z = newZ - self.lbox
-                self.atoms[atom].zprev -= self.lbox
+                self.atoms[atom].zprev -= self.lbox 
             else:
                 self.atoms[atom].z = newZ
-         
 
     def resetForces(self):
         """Sets all forces to zero"""
@@ -179,6 +182,19 @@ class Simulation:
         sumv2 = 0
         for atom in self.atoms:
             sumv2 += atom.vx**2 + atom.vy**2 + atom.vz**2
-        temp = (self.m/(3*self.numAtoms*self.kb))*sumv2
-        print("SUMV2 " + str(sumv2))
-        print("TEMP: " + str(temp))
+        self.realTemp = (self.m/(3*self.numAtoms*self.kb))*sumv2
+        print("TEMP: " + str(self.realTemp))
+        
+    def scaleTemperature(self):
+        """Scales the temperature according to desired temperature"""
+        if self.realTemp > 100.0 or self.realTemp < 80.0:
+            print("Rescaling temperatures...")
+            for atom in range(0, len(self.atoms)-1):
+                self.atoms[atom].vx *= math.sqrt(self.T/self.realTemp)
+                self.atoms[atom].vy *= math.sqrt(self.T/self.realTemp)
+                self.atoms[atom].vz *= math.sqrt(self.T/self.realTemp)
+                
+    def writeToFile(self):
+        with open("output.csv", "a") as myfile:
+            myfile.write(str(self.realTemp))
+            myfile.write("\n")
