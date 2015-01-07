@@ -14,7 +14,7 @@ try:
     os.remove("output.csv")
 except OSError:
     pass
-# Instanstiate a new simulation object.
+# Instantiate a new simulation object.
 sim = Simulation()
 
 # Initially place each atom on a simple cubic lattice

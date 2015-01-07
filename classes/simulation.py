@@ -22,8 +22,10 @@ class Simulation:
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*sigma # length of the box. (meters)
     dt = 1e-14 # Time step, seconds
-    nSteps = 40 # Number of time steps
+    nSteps = 10 # Number of time steps
     realTemp = 0 # System temperature
+
+    cutoffCount = 0
 
     atoms = []
     temperatures = [0.0]*nSteps
@@ -78,7 +80,7 @@ class Simulation:
             self.atoms[atom].fy *= 48*self.e
             self.atoms[atom].fz *= 48*self.e
             
-    def ljforce(self, atom1, atom2):
+    def calculateRadius(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         # Calculate distance between two atoms
         dx = self.atoms[atom1].x - self.atoms[atom2].x
@@ -92,6 +94,9 @@ class Simulation:
         
         r2 = dx*dx + dy*dy + dz*dz
 
+        if r2 < self.rcutsq:
+            calculateForce(atom1, atom2)
+    def calculateForce(self, atom1, atom2):
         if r2 < self.rcutsq:
             fr2 = (self.sigma**2)/r2
             fr6 = fr2**3

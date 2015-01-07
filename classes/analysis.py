@@ -15,5 +15,16 @@ class Analysis:
     
     def pairDistributionFunction(self):
         """Generates a pair-distribution function on given data"""
+        atom_counts = []
         for step in range(0, 5*sigma, dr):
-            pass
+            for atom in range(0, self.numAtoms):
+                dx = self.atoms[atom1].x - self.atoms[atom2].x
+                dy = self.atoms[atom1].y - self.atoms[atom2].y
+                dz = self.atoms[atom1].z - self.atoms[atom2].z
+        
+                # Minimum Image Convention
+                dx -= self.lbox*round(dx/self.lbox)
+                dy -= self.lbox*round(dy/self.lbox)
+                dz -= self.lbox*round(dz/self.lbox)
+        
+                r2 = dx*dx + dy*dy + dz*dz
