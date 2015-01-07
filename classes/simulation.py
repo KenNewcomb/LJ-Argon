@@ -3,7 +3,7 @@
 ## System imports
 import random
 import math
-import time
+import copy
 
 ## Local imports
 from atom import Atom
@@ -24,8 +24,7 @@ class Simulation:
     dt = 1e-14 # Time step, seconds
     nSteps = 10 # Number of time steps
     currentTemp = 0 # System temperature
-
-    cutoffCount = 0
+    epot = 0 # Potential energy
 
     atoms = []
     temperatures = []
@@ -36,18 +35,19 @@ class Simulation:
             self.atoms.append(Atom())
         self.assignPositions()
         self.applyBoltzmannDist()
+        self.correctMomenta()
         
     def assignPositions(self):
         """Places each atom in arbitrary positions in the box."""
         n = int(math.ceil(self.numAtoms**(1.0/3.0))) # Number of atoms in a direction
         particle = 0 # Particles placed so far
         
-        for x in range(0, n):
+        for x in range(0, n-1):
             for y in range(0, n):
                 for z in range(0, n):
                     if (particle < self.numAtoms):
-                        self.atoms[particle].x = x * self.sigma
-                        self.atoms[particle].y = y * self.sigma                 
+                        self.atoms[particle].x = x * self.sigma*1.1
+                        self.atoms[particle].y = y * self.sigma             
                         self.atoms[particle].z = z * self.sigma
                         particle += 1
 
@@ -59,7 +59,7 @@ class Simulation:
         # Establish Normal Distribution
         for i in range(0, 3*self.numAtoms):
             normDist.append(random.gauss(0,1))
-        
+      
         # Apply scaling factor to distribution
         for number in range(0, 3*self.numAtoms):
             normDist[number] = normDist[number]*scaling_factor
@@ -70,8 +70,23 @@ class Simulation:
             self.atoms[atom].vy = normDist[atom*3+1]
             self.atoms[atom].vz = normDist[atom*3+2]
 
+    def correctMomenta(self):
+        sumvx = 0
+        sumvy = 0
+        sumvz = 0
+        
+        for atom in range(0, self.numAtoms):
+            sumvx += self.atoms[atom].vx
+            sumvy += self.atoms[atom].vy
+            sumvz += self.atoms[atom].vz
+        
+        for atom in range(0, self.numAtoms):
+            self.atoms[atom].vx -= sumvx/self.numAtoms
+            self.atoms[atom].vy -= sumvy/self.numAtoms
+            self.atoms[atom].vz -= sumvz/self.numAtoms
+            
+        
     def runSimulation(self, step):
-        start = time.time()
         self.updateForces()
         self.verletIntegration()
         self.currentTemperature = self.getTemperature(step)
@@ -79,9 +94,6 @@ class Simulation:
         # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
         if step > 100:
             self.scaleTemperature()
-        stop = time.time()
-        print("Time: " + str(stop-start))
-        print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
@@ -173,16 +185,17 @@ class Simulation:
         sumv2 = 0
         for atom in self.atoms:
             sumv2 += atom.vx**2 + atom.vy**2 + atom.vz**2
+        self.currentTemp = (self.m/(3*self.numAtoms*self.kb))*sumv2
         return (self.m/(3*self.numAtoms*self.kb))*sumv2
     
     def getAtoms(self):
-        return self.atoms
+        return copy.deepcopy(self.atoms)
         
     def scaleTemperature(self):
         """Scales the temperature according to desired temperature"""
-        if self.realTemp > 100.0 or self.realTemp < 80.0:
+        if self.currentTemp > 100.0 or self.currentTemp < 80.0:
             print("Rescaling velocities...")
             for atom in range(0, self.numAtoms):
-                self.atoms[atom].vx *= math.sqrt(self.T/self.realTemp)
-                self.atoms[atom].vy *= math.sqrt(self.T/self.realTemp)
-                self.atoms[atom].vz *= math.sqrt(self.T/self.realTemp)
+                self.atoms[atom].vx *= math.sqrt(self.temp/self.currentTemp)
+                self.atoms[atom].vy *= math.sqrt(self.temp/self.currentTemp)
+                self.atoms[atom].vz *= math.sqrt(self.temp/self.currentTemp)

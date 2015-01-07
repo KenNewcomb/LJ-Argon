@@ -9,6 +9,7 @@ import os
 from classes.simulation import Simulation
 from classes.analysis import Analysis
 from classes.filewriter import fileWriter
+from classes.atom import Atom
 
 # Remove the output file if it exists
 try:
@@ -17,18 +18,22 @@ except OSError:
     pass
 
 # Number of time steps to run
-nSteps = 100
+nSteps = 300
 
 # Instantiate a new simulation object.
 sim = Simulation()
-analysis = Analysis()
+analysis = Analysis(sim.getAtoms())
 fw = fileWriter()
+
+def printStepInformation(temp):
+    print("Current System Temperature: " + str(temp))
+    print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
 
 # Run the simulation for n steps
 for step in range(0, nSteps):
     sim.runSimulation(step)
-    temp = sim.getTemperature
-    fw.addTemp(temp)
-    analysis.velocityAutocorrelation(temp)
+    temp = sim.getTemperature(step)
+    printStepInformation(temp)
     
-    
+    analysis.updateAtoms(sim.getAtoms())
+    analysis.velocityAutocorrelation(step)
