@@ -10,8 +10,8 @@ class Analysis:
     atoms = [] # List of atoms
     nr = [] # n(r), number of particles at radius r
     
-    def __init__(self, atoms):
-        self.atoms = atoms
+    def __init__(self):
+        pass
     
     def pairDistributionFunction(self):
         """Generates a pair-distribution function on given data"""
@@ -28,3 +28,6 @@ class Analysis:
                 dz -= self.lbox*round(dz/self.lbox)
         
                 r2 = dx*dx + dy*dy + dz*dz
+    
+    def velocityAutocorrelation(self, temp):
+        pass

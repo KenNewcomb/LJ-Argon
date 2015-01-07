@@ -18,17 +18,17 @@ class Simulation:
     sigma = 3.4e-10 # sigma in Lennard-Jones Potential, meters
     rcut = 2.25*sigma # Cutoff radius, meters
     rcutsq = rcut**2 # Square of the cutoff radius.
-    T = 90 # Temperature, K
+    temp = 90 # Temperature, K
     numAtoms = 864 # Number of atoms to simulate
     lbox = 10.229*sigma # length of the box. (meters)
     dt = 1e-14 # Time step, seconds
     nSteps = 10 # Number of time steps
-    realTemp = 0 # System temperature
+    currentTemp = 0 # System temperature
 
     cutoffCount = 0
 
     atoms = []
-    temperatures = [0.0]*nSteps
+    temperatures = []
     
     def __init__(self):
         """Creates a simulation with numAtoms"""
@@ -54,7 +54,7 @@ class Simulation:
     def applyBoltzmannDist(self):
         """Applies Boltzmann distribution to atomic velocities"""
         normDist = []
-        scaling_factor = math.sqrt(self.kb*self.T/self.m)
+        scaling_factor = math.sqrt(self.kb*self.temp/self.m)
 
         # Establish Normal Distribution
         for i in range(0, 3*self.numAtoms):
@@ -70,21 +70,18 @@ class Simulation:
             self.atoms[atom].vy = normDist[atom*3+1]
             self.atoms[atom].vz = normDist[atom*3+2]
 
-    def runSimulation(self):
-        for step in range(0, self.nSteps):
-            start = time.time()
-            self.updateForces()
-            self.verletIntegration()
-            self.getTemperature(step)
-            self.resetForces()
-            # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
-            if step > 100:
-                self.scaleTemperature()
-            stop = time.time()
-            print("Time: " + str(stop-start))
-            print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
-        print("Writing to file")
-        self.writeToFile()
+    def runSimulation(self, step):
+        start = time.time()
+        self.updateForces()
+        self.verletIntegration()
+        self.currentTemperature = self.getTemperature(step)
+        self.resetForces()
+        # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
+        if step > 100:
+            self.scaleTemperature()
+        stop = time.time()
+        print("Time: " + str(stop-start))
+        print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
@@ -176,9 +173,10 @@ class Simulation:
         sumv2 = 0
         for atom in self.atoms:
             sumv2 += atom.vx**2 + atom.vy**2 + atom.vz**2
-        self.realTemp = (self.m/(3*self.numAtoms*self.kb))*sumv2
-        self.temperatures[step] = (self.realTemp)
-        print("TEMP: " + str(self.realTemp))
+        return (self.m/(3*self.numAtoms*self.kb))*sumv2
+    
+    def getAtoms(self):
+        return self.atoms
         
     def scaleTemperature(self):
         """Scales the temperature according to desired temperature"""
@@ -188,8 +186,3 @@ class Simulation:
                 self.atoms[atom].vx *= math.sqrt(self.T/self.realTemp)
                 self.atoms[atom].vy *= math.sqrt(self.T/self.realTemp)
                 self.atoms[atom].vz *= math.sqrt(self.T/self.realTemp)
-                
-    def writeToFile(self):
-        with open("output.csv", "a") as output:
-            for temperature in self.temperatures:
-                output.write("%s\n" % temperature)
