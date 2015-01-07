@@ -72,7 +72,7 @@ class Simulation:
         """Calculates the net potential on each atom, applying a cutoff radius"""
         for atom1 in range(0, self.numAtoms-1):
             for atom2 in range(atom1+1, self.numAtoms):
-                self.ljforce(atom1, atom2)
+                self.calculateForce(atom1, atom2)
                 
             # Multiply by constants        
         for atom in range(0, self.numAtoms):
@@ -80,7 +80,7 @@ class Simulation:
             self.atoms[atom].fy *= 48*self.e
             self.atoms[atom].fz *= 48*self.e
             
-    def calculateRadius(self, atom1, atom2):
+    def calculateForce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
         # Calculate distance between two atoms
         dx = self.atoms[atom1].x - self.atoms[atom2].x
@@ -94,9 +94,6 @@ class Simulation:
         
         r2 = dx*dx + dy*dy + dz*dz
 
-        if r2 < self.rcutsq:
-            calculateForce(atom1, atom2)
-    def calculateForce(self, atom1, atom2):
         if r2 < self.rcutsq:
             fr2 = (self.sigma**2)/r2
             fr6 = fr2**3
