@@ -17,11 +17,5 @@ except OSError:
 # Instantiate a new simulation object.
 sim = Simulation()
 
-# Initially place each atom on a simple cubic lattice
-sim.assignPositions()
-	
-# Apply random velocities to particles.
-sim.applyBoltzmannDist()
-
-### MAIN PROGRAM LOOP ###
-sim.mainLoop()
+# Run the simulation.
+sim.runSimulation()

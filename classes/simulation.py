@@ -34,7 +34,9 @@ class Simulation:
         """Creates a simulation with numAtoms"""
         for i in range(0,self.numAtoms):
             self.atoms.append(Atom())
-
+        self.assignPositions()
+        self.applyBoltzmannDist()
+        
     def assignPositions(self):
         """Places each atom in arbitrary positions in the box."""
         n = int(math.ceil(self.numAtoms**(1.0/3.0))) # Number of atoms in a direction
@@ -68,13 +70,29 @@ class Simulation:
             self.atoms[atom].vy = normDist[atom*3+1]
             self.atoms[atom].vz = normDist[atom*3+2]
 
+    def runSimulation(self):
+        for step in range(0, self.nSteps):
+            start = time.time()
+            self.updateForces()
+            self.verletIntegration()
+            self.getTemperature(step)
+            self.resetForces()
+            # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
+            if step > 100:
+                self.scaleTemperature()
+            stop = time.time()
+            print("Time: " + str(stop-start))
+            print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
+        print("Writing to file")
+        self.writeToFile()
+        
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
         for atom1 in range(0, self.numAtoms-1):
             for atom2 in range(atom1+1, self.numAtoms):
                 self.calculateForce(atom1, atom2)
                 
-            # Multiply by constants        
+        # Multiply by constants        
         for atom in range(0, self.numAtoms):
             self.atoms[atom].fx *= 48*self.e
             self.atoms[atom].fy *= 48*self.e
@@ -175,20 +193,3 @@ class Simulation:
         with open("output.csv", "a") as output:
             for temperature in self.temperatures:
                 output.write("%s\n" % temperature)
-                
-    def mainLoop(self):
-        for step in range(0, self.nSteps):
-            start = time.time()
-            self.updateForces()
-            self.verletIntegration()
-            self.getTemperature(step)
-            self.resetForces()
-            if step > 100:
-                self.scaleTemperature()
-            stop = time.time()
-            print("Time: " + str(stop-start))
-            print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
-        start = time.time()
-        print("writing to file")
-        self.writeToFile()
-        stop = time.time()  
