@@ -78,7 +78,5 @@ class Analysis:
                 vz += self.originalAtoms[atom].vz * self.currentAtoms[atom].vz
             self.velacf += vx + vy + vz
             self.velacf /= self.numAtoms*self.velacfinit
-            print(self.velacf)
-            
         self.velacf = 0
         
