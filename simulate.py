@@ -18,7 +18,7 @@ except OSError:
     pass
 
 # Number of time steps to run
-nSteps = 300
+nSteps = 200
 
 # Instantiate a new simulation object.
 sim = Simulation()
@@ -37,3 +37,4 @@ for step in range(0, nSteps):
     
     analysis.updateAtoms(sim.getAtoms())
     analysis.velocityAutocorrelation(step)
+analysis.pairDistributionFunction()
