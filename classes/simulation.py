@@ -89,8 +89,10 @@ class Simulation:
     def runSimulation(self, step):
         self.updateForces()
         self.verletIntegration()
-        self.currentTemperature = self.getTemperature()
+        self.updateTemperature()
         self.resetForces()
+        print("Current System Temperature: " + str(self.currentTemp))
+        print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
         # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
         if step > 100:
             self.scaleTemperature()
@@ -180,17 +182,19 @@ class Simulation:
             self.atoms[atom].fy = 0
             self.atoms[atom].fz = 0
             
-    def getTemperature(self):
+    def updateTemperature(self):
         """Calculates the current system temperature"""
         sumv2 = 0
         for atom in self.atoms:
             sumv2 += atom.vx**2 + atom.vy**2 + atom.vz**2
         self.currentTemp = (self.m/(3*self.numAtoms*self.kb))*sumv2
         self.temperatures.append(self.currentTemp)
-        return self.currentTemp
     
     def getAtoms(self):
         return copy.deepcopy(self.atoms)
+    
+    def getTemperature(self):
+        return copy.deepcopy(self.temperatures)
         
     def scaleTemperature(self):
         """Scales the temperature according to desired temperature"""

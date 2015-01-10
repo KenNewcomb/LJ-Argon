@@ -25,21 +25,12 @@ analysis = Analysis(sim.getAtoms())
 # Instatiate an object that writes output to the disk.
 fw = fileWriter()
 
-# For debugging purposes
-def printStepInformation(temp):
-    print("Current System Temperature: " + str(temp))
-    print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
-
 ### MAIN LOOP ###
 
 # Run the simulation for n steps
 for step in range(0, nSteps):
     # Run the simulation for a single step
     sim.runSimulation(step)
-    # Get the current system temperature
-    temp = sim.getTemperature()
-    # Print debugging information.
-    printStepInformation(temp)
     # Add the current state to the analysis object
     analysis.updateAtoms(sim.getAtoms())
     # Calculate the velocity autocorrelation function for this step.
