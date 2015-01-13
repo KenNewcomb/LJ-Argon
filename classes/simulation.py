@@ -42,11 +42,11 @@ class Simulation:
         n = int(math.ceil(self.numAtoms**(1.0/3.0))) # Number of atoms in a direction
         particle = 0 # Particles placed so far
         
-        for x in range(0, n-1):
+        for x in range(0, n):
             for y in range(0, n):
                 for z in range(0, n):
                     if (particle < self.numAtoms):
-                        self.atoms[particle].x = x * self.sigma*1.1
+                        self.atoms[particle].x = x * self.sigma
                         self.atoms[particle].y = y * self.sigma             
                         self.atoms[particle].z = z * self.sigma
                         particle += 1

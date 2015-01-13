@@ -16,6 +16,11 @@ class fileWriter:
         except OSError:
             pass
 
+	try:
+            os.remove("vac.csv")
+        except OSError:
+            pass
+
     def writeTemperatures(self, temperatures):
         """Writes the system temperatures at each step to a file"""
         with open("temperatures.csv", "a") as output:
