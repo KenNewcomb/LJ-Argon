@@ -14,7 +14,7 @@ from classes.atom import Atom
 
 
 # Number of time steps to run
-nSteps = 10
+nSteps = 200
 
 ### INITIALIZATION ###
 
@@ -36,7 +36,7 @@ for step in range(0, nSteps):
     # Calculate the velocity autocorrelation function for this step.
     analysis.velocityAutocorrelation(step)
     
-### DATA ANALYSIS ###
+### DATA OUTPUT ###
 fw.writeTemperatures(sim.getTemperature())
-# Calculate the radial distribution function.
-analysis.pairDistributionFunction()
+fw.writeRDF(analysis.pairDistributionFunction())
+fw.writeVAC(analysis.getVAC())

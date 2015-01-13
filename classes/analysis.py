@@ -12,9 +12,11 @@ class Analysis:
     originalAtoms = [] # List of atoms
     currentAtoms = []
     nr = [] # n(r), number of particles at radius r
-    velacfinit = 0
-    velacf = 0 # velocity autocorrelation function
+    velacfinit = 0 # Velocity autocorrlation function at time = 0
+    velacf = 0 # velocity autocorrelation function at a time step
     lbox = 10.229*sigma # Length of box
+    
+    velaclist = [] # The velocity autocorrelation function for a simulation
     
     def __init__(self, atoms):
         """Initalizize the analysis with the atoms in their initial state"""
@@ -47,18 +49,16 @@ class Analysis:
                 # If the atom is within the range
                 if (r < (cur_r + self.dr)) and (r > cur_r):
                     atom_count += 1
-                
+
             # Increment by dr    
             cur_r += self.dr
             
             # Add the counts for that radius
-            atom_counts.append(atom_count)
+            atom_counts.append((self.V*atom_count/self.numAtoms)/(4*math.pi*r2*self.dr))
             
             # Reset atom count for next radius
             atom_count = 0
-        
-        for count in atom_counts:
-            print count
+        return(atom_counts)
                     
     def velocityAutocorrelation(self, step):
         vx = 0
@@ -71,6 +71,7 @@ class Analysis:
                 vz += self.originalAtoms[atom].vz * self.currentAtoms[atom].vz
             self.velacfinit += vx + vy + vz
             self.velacfinit /= self.numAtoms
+            self.velaclist.append(self.velacfinit)
         else:   
             for atom in range(0, self.numAtoms):
                 vx += self.originalAtoms[atom].vx * self.currentAtoms[atom].vx
@@ -78,5 +79,9 @@ class Analysis:
                 vz += self.originalAtoms[atom].vz * self.currentAtoms[atom].vz
             self.velacf += vx + vy + vz
             self.velacf /= self.numAtoms*self.velacfinit
-        self.velacf = 0
+            self.velaclist.append(self.velacf)
+            self.velacf = 0
+    
+    def getVAC(self):
+        return self.velaclist
         
