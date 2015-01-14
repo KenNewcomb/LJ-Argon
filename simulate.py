@@ -11,10 +11,8 @@ from classes.analysis import Analysis
 from classes.filewriter import fileWriter
 from classes.atom import Atom
 
-
-
 # Number of time steps to run
-nSteps = 200
+nSteps = 20
 
 ### INITIALIZATION ###
 
@@ -37,6 +35,6 @@ for step in range(0, nSteps):
     analysis.velocityAutocorrelation(step)
     
 ### DATA OUTPUT ###
-fw.writeTemperatures(sim.getTemperature())
-fw.writeRDF(analysis.pairDistributionFunction())
-fw.writeVAC(analysis.getVAC())
+fw.writeToFile("temp.csv", sim.getTemperature())
+fw.writeToFile("rdf.csv", analysis.pairDistributionFunction())
+fw.writeToFile("vac.csv", analysis.getVAC())
