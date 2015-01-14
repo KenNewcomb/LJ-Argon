@@ -2,7 +2,10 @@
 
 class Atom:
     
-    def __init__(self):
+    def __init__(self, atomNum):
+        # Atom number
+        self.num = "Ar"
+        
         # Spatial (cartesian) coordinates
         self.x = 0
         self.y = 0
