@@ -25,14 +25,13 @@ class Simulation:
     nSteps = 10 # Number of time steps
     currentTemp = 0 # System temperature
 
-    atomlist = []
     atoms = []
     temperatures = []
     
     def __init__(self):
         """Creates a simulation with numAtoms"""
         for i in range(0,self.numAtoms):
-            self.atoms.append(Atom(i+1))
+            self.atoms.append(Atom())
         self.assignPositions()
         self.applyBoltzmannDist()
         self.correctMomenta()
@@ -90,7 +89,6 @@ class Simulation:
         self.updateForces()
         self.verletIntegration()
         self.updateTemperature()
-        self.atomlist.append(copy.deepcopy(self.atoms))
         self.resetForces()
         print("Current System Temperature: " + str(self.currentTemp))
         print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")

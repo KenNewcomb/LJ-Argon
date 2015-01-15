@@ -25,6 +25,11 @@ class fileWriter:
             os.remove("ljargon.xyz")
         except OSError:
             pass
+        
+        # Write header to .xyz file
+        with open("ljargon.xyz", "a") as output:
+            output.write("864\n") # Number of atoms
+            output.write("Ar\n") # Name of Molecule
 
     def writeData(self, filename, data):
         """Writes data at each step to a file"""
@@ -32,11 +37,8 @@ class fileWriter:
             for point in data:
                 output.write("%s\n" % point)
 
-    def writeXYZ(self, xyzs):
+    def writeXYZ(self, atoms):
         """Writes positional data to a .xyz file"""
         with open("ljargon.xyz", "a") as output:
-            output.write("864\n") # Number of atoms
-            output.write("Ar\n") # Name of Molecule
-            for frame in xyzs:
-                for atom in frame:
-                    output.write("%s %s %s %s\n" % (atom.num, atom.x, atom.y, atom.z))
+            for atom in atoms:
+                output.write("Ar %s %s %s\n" % (atom.x, atom.y, atom.z))
