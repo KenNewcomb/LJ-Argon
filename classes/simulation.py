@@ -24,7 +24,6 @@ class Simulation:
     dt = 1e-14 # Time step, seconds
     nSteps = 10 # Number of time steps
     currentTemp = 0 # System temperature
-    epot = 0 # Potential energy
 
     atomlist = []
     atoms = []
@@ -91,7 +90,7 @@ class Simulation:
         self.updateForces()
         self.verletIntegration()
         self.updateTemperature()
-        self.atomlist.append(self.atoms)
+        self.atomlist.append(copy.deepcopy(self.atoms))
         self.resetForces()
         print("Current System Temperature: " + str(self.currentTemp))
         print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")

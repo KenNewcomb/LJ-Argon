@@ -28,15 +28,16 @@ class Analysis:
         
     def pairDistributionFunction(self):
         """Generates a pair-distribution function on given data"""
-        atom_counts = []
-        atom_count = 0
+        atom_counts = [0]*50
         cur_r = 0
         
-        for step in range(0, 50):
-            for atom in range(1, self.numAtoms):
-                dx = self.currentAtoms[0].x - self.currentAtoms[atom].x
-                dy = self.currentAtoms[0].y - self.currentAtoms[atom].y
-                dz = self.currentAtoms[0].z - self.currentAtoms[atom].z
+        print("Generating rdf..."),
+        
+        for atom1 in range(0, self.numAtoms-1):
+            for atom2 in range(1, self.numAtoms):
+                dx = self.currentAtoms[atom1].x - self.currentAtoms[atom2].x
+                dy = self.currentAtoms[atom1].y - self.currentAtoms[atom2].y
+                dz = self.currentAtoms[atom1].z - self.currentAtoms[atom2].z
 
                 # Minimum Image Convention
                 dx -= self.lbox*round(dx/self.lbox)
@@ -46,19 +47,18 @@ class Analysis:
                 r2 = dx*dx + dy*dy + dz*dz
                 r = math.sqrt(r2)
                 
-                # If the atom is within the range
-                if (r < (cur_r + self.dr)) and (r > cur_r):
-                    atom_count += 1
-
-            # Increment by dr    
-            cur_r += self.dr
+                # If the atom is within the 
+                for radius in range(0, 50):
+                    if (r < ((radius+1)*self.dr)) and (r > radius*self.dr):
+                        atom_counts[radius] += 1
             
-            # Add the counts for that radius
-            atom_counts.append((self.V*atom_count/self.numAtoms)/(4*math.pi*r2*self.dr))
-            
-            # Reset atom count for next radius
-            atom_count = 0
+        # Multiply by constants
+        for radius in range(1, 50):
+            atom_counts[radius] *= (self.V/self.numAtoms**2)/(4*math.pi*((radius*self.dr)**2)*self.dr)
+        print("done.")    
         return(atom_counts)
+        
+        
                     
     def velocityAutocorrelation(self, step):
         vx = 0

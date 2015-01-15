@@ -12,7 +12,7 @@ from classes.filewriter import fileWriter
 from classes.atom import Atom
 
 # Number of time steps to run
-nSteps = 250
+nSteps = 100
 
 ### INITIALIZATION ###
 
