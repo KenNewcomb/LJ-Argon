@@ -1,14 +1,15 @@
 """analysis.py: A class that provides analysis of the output data."""
 
 import math
-
+import numpy
+import matplotlib.pyplot as plot
 class Analysis:
     
     sigma = 3.4e-10 # sigma in Lennard-Jones Potential, meters
     dr = sigma/10 # (1/100)*sigma
     V = (10.229*sigma)**3 # Volume of box
     numAtoms = 864 # Number of atoms
-    
+    dt = 1e-14
     originalAtoms = [] # List of atoms
     currentAtoms = []
     nr = [] # n(r), number of particles at radius r
@@ -17,6 +18,8 @@ class Analysis:
     lbox = 10.229*sigma # Length of box
     
     velaclist = [] # The velocity autocorrelation function for a simulation
+    radiuslist = []
+    timelist = []
     
     def __init__(self, atoms):
         """Initalizize the analysis with the atoms in their initial state"""
@@ -56,9 +59,7 @@ class Analysis:
         for radius in range(1, 50):
             atom_counts[radius] *= (self.V/self.numAtoms**2)/(4*math.pi*((radius*self.dr)**2)*self.dr)
         print("done.")    
-        return(atom_counts)
-        
-        
+        return(atom_counts)        
                     
     def velocityAutocorrelation(self, step):
         vx = 0
@@ -84,4 +85,22 @@ class Analysis:
     
     def getVAC(self):
         return self.velaclist
-        
+
+    def plotRDF(self):
+        """Plots the RDF on the screen"""
+        rdf = numpy.loadtxt("rdf.csv")
+        for radius in range(0,50):
+            self.radiuslist.append(radius*self.dr)
+        plot.figure()
+        plot.plot(self.radiuslist,rdf)
+        plot.show()
+
+    def plotVAC(self, nSteps):
+       """Plots the VAC on the screen"""
+       vac = numpy.loadtxt("vac.csv")
+       vac[0] = 1
+       for time in range(0, nSteps):
+           self.timelist.append(float(time) * self.dt)
+       plot.figure()
+       plot.plot(self.timelist, vac)
+       plot.show()
