@@ -1,15 +1,9 @@
 """simulate.py: The main driver for the simulation."""
 
-## System imports
-import sys
-import math
-import os
-
 ## Local imports
 from classes.simulation import Simulation
 from classes.analysis import Analysis
 from classes.filewriter import fileWriter
-from classes.atom import Atom
 
 # Number of time steps to run
 nSteps = 50
