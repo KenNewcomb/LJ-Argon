@@ -1,8 +1,9 @@
 """analysis.py: A class that provides analysis of the output data."""
 
 import math
-#import numpy
-#import matplotlib.pyplot as plot
+import numpy
+import matplotlib.pyplot as plot
+
 class Analysis:
     
     kb = 1.380e-23 # Boltzmann (J/K)
@@ -117,8 +118,10 @@ class Analysis:
             KE.append(3*self.numAtoms*self.kb*temp/2)
             
         steplist = []
+
         for time in range(0, nSteps):
-            steplist.append(time)
-        plot.figure(steplist, potentials, steplist, KE)
-        plot.plot()
+            steplist.append(float(time))
+        plot.figure()
+        plot.plot(steplist, potentials)
+        plot.show()
         

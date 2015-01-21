@@ -41,4 +41,4 @@ fw.writeData("vac.csv", analysis.getVAC())
 
 analysis.plotRDF()
 analysis.plotVAC(nSteps)
-analysis.plotEnergy(sim.temperatures, sim.temperatures, sim.potentials, nSteps)
+analysis.plotEnergy(sim.temperatures, sim.potentials, nSteps)

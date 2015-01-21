@@ -93,7 +93,7 @@ class Simulation:
         self.updatePotentials()
         self.resetForces()
         print("Current System Temperature: " + str(self.currentTemp))
-        print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
+        print("----------------- COMPLETED STEP " + str(step+1) + " --------------------")
         # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
         if step > 100:
             self.scaleTemperature()
