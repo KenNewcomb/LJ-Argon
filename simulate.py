@@ -1,12 +1,16 @@
 """simulate.py: The main driver for the simulation."""
 
-## Local imports
 from classes.simulation import Simulation
 from classes.analysis import Analysis
 from classes.filewriter import fileWriter
+import sys
 
 # Number of time steps to run
-nSteps = 10
+if len(sys.argv) != 2:
+    print("Usage: python simulate.py nSteps")
+    exit(0)
+else:
+    nSteps = int(sys.argv[1])
 
 ### INITIALIZATION ###
 

@@ -6,4 +6,4 @@ A [molecular dynamics](https://en.wikipedia.org/wiki/Molecular_dynamics) simulat
 Usage
 ------
 
-	python simulate.py
+	python simulate.py <number of steps>
