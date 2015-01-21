@@ -6,7 +6,7 @@ from classes.analysis import Analysis
 from classes.filewriter import fileWriter
 
 # Number of time steps to run
-nSteps = 300
+nSteps = 10
 
 ### INITIALIZATION ###
 
@@ -31,9 +31,10 @@ for step in range(0, nSteps):
     fw.writeXYZ(sim.getAtoms())
     
 ### DATA OUTPUT ###
-fw.writeData("temp.csv", sim.getTemperature())
+fw.writeData("temp.csv", sim.temperatures)
 fw.writeData("rdf.csv", analysis.pairDistributionFunction())
 fw.writeData("vac.csv", analysis.getVAC())
 
 analysis.plotRDF()
 analysis.plotVAC(nSteps)
+analysis.plotEnergy(sim.temperatures, sim.temperatures, sim.potentials, nSteps)

@@ -1,10 +1,11 @@
 """analysis.py: A class that provides analysis of the output data."""
 
 import math
-import numpy
-import matplotlib.pyplot as plot
+#import numpy
+#import matplotlib.pyplot as plot
 class Analysis:
     
+    kb = 1.380e-23 # Boltzmann (J/K)
     sigma = 3.4e-10 # sigma in Lennard-Jones Potential, meters
     dr = sigma/10 # (1/100)*sigma
     V = (10.229*sigma)**3 # Volume of box
@@ -88,15 +89,18 @@ class Analysis:
 
     def plotRDF(self):
         """Plots the RDF on the screen"""
+        pass
         rdf = numpy.loadtxt("rdf.csv")
         for radius in range(0,50):
             self.radiuslist.append(radius*self.dr)
         plot.figure()
         plot.plot(self.radiuslist,rdf)
         plot.show()
+        
 
     def plotVAC(self, nSteps):
        """Plots the VAC on the screen"""
+       pass
        vac = numpy.loadtxt("vac.csv")
        vac[0] = 1
        for time in range(0, nSteps):
@@ -104,3 +108,17 @@ class Analysis:
        plot.figure()
        plot.plot(self.timelist, vac)
        plot.show()
+
+    def plotEnergy(self, temperatures, potentials, nSteps):
+        """Plots the kinetic, potential, and total energies of the system"""
+        # Temperatures --> Energies
+        KE = []
+        for temp in temperatures:
+            KE.append(3*self.numAtoms*self.kb*temp/2)
+            
+        steplist = []
+        for time in range(0, nSteps):
+            steplist.append(time)
+        plot.figure(steplist, potentials, steplist, KE)
+        plot.plot()
+        

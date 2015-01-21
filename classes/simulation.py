@@ -26,7 +26,8 @@ class Simulation:
     currentTemp = 0 # System temperature
 
     atoms = []
-    temperatures = []
+    temperatures = [] # Temperatures at each time step
+    potentials = [] # Potential energy at each time step
     
     def __init__(self):
         """Creates a simulation with numAtoms"""
@@ -89,6 +90,7 @@ class Simulation:
         self.updateForces()
         self.verletIntegration()
         self.updateTemperature()
+        self.updatePotentials()
         self.resetForces()
         print("Current System Temperature: " + str(self.currentTemp))
         print("-----------------COMPLETED STEP " + str(step+1) + " --------------------")
@@ -107,6 +109,7 @@ class Simulation:
             self.atoms[atom].fx *= 48*self.e
             self.atoms[atom].fy *= 48*self.e
             self.atoms[atom].fz *= 48*self.e
+            self.atoms[atom].potential *= 4*self.e
             
     def calculateForce(self, atom1, atom2):
         """Calculates the force between two atoms using LJ 12-6 potential"""
@@ -126,31 +129,33 @@ class Simulation:
             fr2 = (self.sigma**2)/r2
             fr6 = fr2**3
             force = fr6*(fr6 - 0.5)/r2
+            pot = fr6*(fr6 - 1)
             
-            forcex = force*dx
-            forcey = force*dy
-            forcez = force*dz
+            # Update forces
+            self.atoms[atom1].fx += force*dx
+            self.atoms[atom2].fx -= force*dx
+            self.atoms[atom1].fy += force*dy
+            self.atoms[atom2].fy -= force*dy
+            self.atoms[atom1].fz += force*dz
+            self.atoms[atom2].fz -= force*dz
             
-            self.atoms[atom1].fx += forcex
-            self.atoms[atom2].fx -= forcex
-            self.atoms[atom1].fy += forcey
-            self.atoms[atom2].fy -= forcey
-            self.atoms[atom1].fz += forcez
-            self.atoms[atom2].fz -= forcez
+            # Update potentials
+            self.atoms[atom1].potential += pot
+            self.atoms[atom2].potential -= pot
             
     def verletIntegration(self):
         """Moves the system through a given time step, according to the energies"""
         for atom in range(0, self.numAtoms):
             
-            # Update velocities
-            self.atoms[atom].vx += (self.atoms[atom].fx/self.m)*self.dt
-            self.atoms[atom].vy += (self.atoms[atom].fy/self.m)*self.dt
-            self.atoms[atom].vz += (self.atoms[atom].fz/self.m)*self.dt
-
             # Update positions
             newX = self.atoms[atom].x + self.atoms[atom].vx*self.dt
             newY = self.atoms[atom].y + self.atoms[atom].vy*self.dt
             newZ = self.atoms[atom].z + self.atoms[atom].vz*self.dt
+            
+            # Update velocities
+            self.atoms[atom].vx += (self.atoms[atom].fx/self.m)*self.dt
+            self.atoms[atom].vy += (self.atoms[atom].fy/self.m)*self.dt
+            self.atoms[atom].vz += (self.atoms[atom].fz/self.m)*self.dt
 
             # Update current positions (applying PBC)
             if newX < 0:
@@ -189,11 +194,15 @@ class Simulation:
         self.currentTemp = (self.m/(3*self.numAtoms*self.kb))*sumv2
         self.temperatures.append(self.currentTemp)
     
+    def updatePotentials(self):
+        """Calculates the current system potential energy"""
+        epot = 0
+        for atom in self.atoms:
+            epot += atom.potential
+        self.potentials.append(epot)
+    
     def getAtoms(self):
         return copy.deepcopy(self.atoms)
-    
-    def getTemperature(self):
-        return copy.deepcopy(self.temperatures)
         
     def scaleTemperature(self):
         """Scales the temperature according to desired temperature"""

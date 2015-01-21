@@ -17,3 +17,5 @@ class Atom:
         self.fx = 0
         self.fy = 0
         self.fz = 0
+
+        self.potential = 0;
