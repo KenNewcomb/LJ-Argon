@@ -116,12 +116,17 @@ class Analysis:
         KE = []
         for temp in temperatures:
             KE.append(3*self.numAtoms*self.kb*temp/2)
-            
+        
+        # Generate a list of steps
         steplist = []
-
         for time in range(0, nSteps):
             steplist.append(float(time))
-        plot.figure()
-        plot.plot(steplist, potentials)
-        plot.show()
         
+        # Generate a total energy function
+        etot = []
+        for energy in range(0, nSteps):
+            etot.append(KE[energy] + potentials[energy])
+            
+        plot.figure()
+        plot.plot(steplist, KE, steplist, potentials, steplist, etot)
+        plot.show()

@@ -31,11 +31,14 @@ class Simulation:
     
     def __init__(self):
         """Creates a simulation with numAtoms"""
+        print("Initializing system..."),
         for i in range(0,self.numAtoms):
             self.atoms.append(Atom())
         self.assignPositions()
         self.applyBoltzmannDist()
         self.correctMomenta()
+        print("done.")
+        print("Simulation is now running.")
         
     def assignPositions(self):
         """Places each atom in arbitrary positions in the box."""
@@ -86,17 +89,18 @@ class Simulation:
             self.atoms[atom].vz -= sumvz/self.numAtoms
             
         
-    def runSimulation(self, step):
+    def runSimulation(self, step, numSteps):
         self.updateForces()
         self.verletIntegration()
         self.updateTemperature()
         self.updatePotentials()
         self.resetForces()
-        print("Current System Temperature: " + str(self.currentTemp))
-        print("----------------- COMPLETED STEP " + str(step+1) + " --------------------")
+        if (step+1) % 10 == 0:
+            print("----------------- COMPLETED STEP " + str(step+1) + "/" + str(numSteps) + " --------------------")
+            print("Time remaining (approximately, in minutes): " + str((1.7/60)*(numSteps-step)))
         # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
-        if step > 100:
-            self.scaleTemperature()
+        #if step > 20 and step < 120:
+            #self.scaleTemperature()
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
@@ -141,21 +145,22 @@ class Simulation:
             
             # Update potentials
             self.atoms[atom1].potential += pot
-            self.atoms[atom2].potential -= pot
+            self.atoms[atom2].potential += pot
             
     def verletIntegration(self):
         """Moves the system through a given time step, according to the energies"""
         for atom in range(0, self.numAtoms):
             
-            # Update positions
-            newX = self.atoms[atom].x + self.atoms[atom].vx*self.dt
-            newY = self.atoms[atom].y + self.atoms[atom].vy*self.dt
-            newZ = self.atoms[atom].z + self.atoms[atom].vz*self.dt
-            
             # Update velocities
             self.atoms[atom].vx += (self.atoms[atom].fx/self.m)*self.dt
             self.atoms[atom].vy += (self.atoms[atom].fy/self.m)*self.dt
             self.atoms[atom].vz += (self.atoms[atom].fz/self.m)*self.dt
+            
+            
+            # Update positions
+            newX = self.atoms[atom].x + self.atoms[atom].vx*self.dt
+            newY = self.atoms[atom].y + self.atoms[atom].vy*self.dt
+            newZ = self.atoms[atom].z + self.atoms[atom].vz*self.dt
 
             # Update current positions (applying PBC)
             if newX < 0:
@@ -185,6 +190,7 @@ class Simulation:
             self.atoms[atom].fx = 0
             self.atoms[atom].fy = 0
             self.atoms[atom].fz = 0
+            self.atoms[atom].pot = 0
             
     def updateTemperature(self):
         """Calculates the current system temperature"""

@@ -26,7 +26,7 @@ fw = fileWriter()
 # Run the simulation for n steps
 for step in range(0, nSteps):
     # Run the simulation for a single step
-    sim.runSimulation(step)
+    sim.runSimulation(step, nSteps)
     # Add the current state to the analysis object
     analysis.updateAtoms(sim.getAtoms())
     # Calculate the velocity autocorrelation function for this step.
