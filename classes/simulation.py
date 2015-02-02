@@ -98,9 +98,9 @@ class Simulation:
         if (step+1) % 10 == 0:
             print("----------------- COMPLETED STEP " + str(step+1) + "/" + str(numSteps) + " --------------------")
             print("Time remaining (approximately, in minutes): " + str((1.7/60)*(numSteps-step)))
-        After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
+        # After 100 steps, scale the temperature by a factor of (Tdesired/T(t))^1/2
         if step > 20 and step < 120:
-            #self.scaleTemperature()
+            self.scaleTemperature()
         
     def updateForces(self):
         """Calculates the net potential on each atom, applying a cutoff radius"""
